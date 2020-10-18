@@ -1,0 +1,45 @@
+.newtable * {
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.newtable > header {
+  padding: 0;
+}
+.newtable .deWhlz {
+  min-height: 0px !important;
+  height: auto;
+}
+.newtable .deWhlz .iqPnSa {
+  height: 56px;
+}
+.newtable.padding > div {
+  min-height: 560px;
+}
+.newtable.padding .react-data-table--cell-content,
+.newtable.padding .card-shipment {
+  padding: 20px 0;
+}
+.newtable.margin-top {
+  margin-top: 2rem;
+}
+.newtable .react-data-table--cell-content p,
+.newtable .card-shipment p {
+  margin: 0;
+}
+.newtable .react-data-table--cell-content p.minitext,
+.newtable .card-shipment p.minitext {
+  font-size: 10px;
+  color: #b3b7c2;
+  margin: 0;
+  display: inline-block;
+}
+.newtable.margin-topHeader {
+  margin-top: -50px;
+}
+
+.rdt_TableCol_Sortable {
+  color: rgba(0, 0, 0, 0.54);
+}
+
+/*# sourceMappingURL=style.css.map */
