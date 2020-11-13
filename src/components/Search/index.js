@@ -25,8 +25,6 @@ const Search = (props) => {
     })
   }, [db])
 
-  // console.log(patients)
-
   useEffect(() => {
     const filterData = () => {
       const regex = new RegExp(filter, 'i')
@@ -40,25 +38,6 @@ const Search = (props) => {
     filterData()
   }, [filter, data])
 
-  const columnsDateExpanded = [
-    {
-      name: 'Fecha',
-      selector: 'date',
-      cell: row => (
-        row.element[0]
-      )
-    },
-  ]
-
-  const columnsTimeExpanded = [
-    {
-      name: 'Hora',
-      selector: 'time',
-      cell: row => (
-        row.element[0]
-      )
-    }
-  ]
 
   const columns = [
     {
@@ -67,38 +46,6 @@ const Search = (props) => {
       cell: row => (row.element[0])
     }
   ]
-
-  const ExpandedTimeSection = (data) => {
-    const temp = []
-    Object.entries(data.data.element[1]).map((element, index) => (
-      temp.push({name: data.data.name, date: data.data.element, element})
-    ))
-    return (
-      <Table
-        className='no-header'
-        onRowClicked={(data) => window.location = `/paciente?name=${data.name}&date=${data.date[0]}&time=${data.element[0]}`}
-        columns={columnsTimeExpanded}
-        data = {temp} />
-    )
-  }
-
-  const ExpandedDateSection = (data) => {
-    const temp = []
-    Object.entries(data.data.element[1]).map((element, index) => (
-      temp.push({name: data.data.element[0],
-      element})
-    ))
-
-    return (
-      <Table
-        className='no-header'
-        expandableRows
-        expandableRowsComponent={<ExpandedTimeSection />}
-        columns={columnsDateExpanded}
-        data={temp} />
-    )
-  }
-
 
   return (
     <section className="container-fluid">
@@ -113,9 +60,8 @@ const Search = (props) => {
               placeholder='Buscar paciente...'
               value={filter} />
               <Table
+                onRowClicked={(row) => window.location = `/paciente?name=${row.element[0]}`}
                 className='table'
-                expandableRows
-                expandableRowsComponent={<ExpandedDateSection />}
                 columns={columns}
                 data={patients} />
           </div>

@@ -55,7 +55,7 @@ const Login = (props) => {
       <section className="row justify-content-center">
         <section className="col-12 col-sm-6 col-md-4">
           <div className="content">
-          <Alert error={error} setError={setError} />
+          <Alert error={error} />
             <div className="form-group">
               <label>Usuario</label>
               <input
