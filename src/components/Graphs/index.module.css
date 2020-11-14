@@ -19,7 +19,7 @@
 }
 
 .graphContent {
-  width: 90%;
+  width: 95%;
   height: 90%;
   background-color: #FFFFFF;
   padding: 20px;
@@ -45,6 +45,7 @@
   flex: 1;
   background-color: hsl(0,0%,90%);
   height: 90%;
+  padding: 20px;
 }
 
 .graphFilters {
