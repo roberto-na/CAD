@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Scatter } from 'react-chartjs-2'
 import regression from 'regression';
-
+import baselineCorrection from 'ml-baseline-correction-regression';
 import Dropdown from '../Dropdown';
 
 import * as firebase from 'firebase/app'
@@ -25,6 +25,10 @@ const Graph = (props) => {
   const [disableButton, setDisableButton] = useState(false)
   const [filters, setFilters] = useState([])
   const [data, setData] = useState({})
+  const [linearRegression, setLinearRegression] = useState({
+    r2: null,
+    formula: null,
+  })
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
@@ -33,6 +37,24 @@ const Graph = (props) => {
       setSidebarOptions(response.val())
     })
   }, [db])
+
+  useEffect(() => {
+    const getLinearRegression = () => {
+      const concatValues = []
+      data.datasets.map((element) => {
+        concatValues.push([parseFloat(element.description), element.max])
+      })
+      concatValues.sort((a, b) => a[0] - b[0]);
+      console.log(concatValues)
+      const lr = getRegression(concatValues)
+      console.log(lr)
+      setLinearRegression({
+        r2: lr.r2,
+        formula: lr.string
+      })
+    }
+    getLinearRegression()
+  }, [data])
 
   const options = {
     zoom: {
@@ -89,29 +111,30 @@ const getRegression = (data) => {
     .on('value', response => {
       const current = response.val().Corriente.replace(/ /g,'').split(',').map(Number)
       const voltage = response.val().Voltaje.replace(/ /g,'').split(',').map(Number)
-      let max = current[0]
+      const {corrected, delta, iteration, baseline} = baselineCorrection(voltage, current); //baseline correction
+      let max = corrected[0]
       let mean = 0;
       let sd = 0;
       for(let i = 0; i < current.length; i++) {
-        max = Math.max(max, current[i])
-        mean += current[i]
+        max = Math.max(max, corrected[i])
+        mean += corrected[i]
       }
       mean = mean / current.length;
-      const concatValues = []
+      // const concatValues = []
       const concatValuesData = []
+      // const linearRegression = getRegression(concatValues)
       for(let i = 0; i < current.length; i++) {
-        sd += (Math.pow((current[i] - mean), 2) / current.length)
-        const temp = []
-        temp.push(voltage[i])
-        temp.push(current[i])
-        concatValues.push(temp)
-        concatValuesData.push({x: voltage[i], y: current[i]})
+        sd += (Math.pow((corrected[i] - mean), 2) / current.length)
+        // const temp = []
+        // temp.push(voltage[i])
+        // temp.push(corrected[i])
+        // concatValues.push(temp)
+        concatValuesData.push({x: voltage[i], y: corrected[i]})
       }
       sd = Math.sqrt(sd)
       const r = Math.floor(Math.random() * Math.floor(256))
       const g = Math.floor(Math.random() * Math.floor(256))
       const b = Math.floor(Math.random() * Math.floor(256))
-      const linearRegression = getRegression(concatValues)
       const dataToGraph = {
         typeToDisplay: 'original',
         label: selectedDate + " " + selectedTime,
@@ -123,10 +146,7 @@ const getRegression = (data) => {
         description: response.val().Descripcion,
         max: max,
         sd: sd,
-        linearRegression: linearRegression.string,
-        r2: linearRegression.r2,
       }
-      console.log(linearRegression)
       const newData = [...data.datasets, dataToGraph]
       setData(prevState => ({
         datasets: newData,
@@ -205,27 +225,41 @@ const getRegression = (data) => {
             <div className={styles.stadistics}>
               <h3>Estadísticas</h3>
               <table>
-                <tr>
-                  <th>Concentración</th>
-                  <th>Pico máximo</th>
-                  <th>Desviación estandar</th>
-                  <th>Regresión lineal</th>
-                  <th>R2</th>
-                </tr>
+                <thead>
+                  <tr>
+                    <th>Concentración</th>
+                    <th>Pico máximo</th>
+                    <th>Desviación estandar</th>
+                  </tr>
+                </thead>
                 {data.datasets && data.datasets.map((element, i) => {
                   if(element.typeToDisplay === 'original') {
                     return (
                       <tbody key={i}>
                         <tr>
-                          <th>{element.description}</th>
+                          <th style={{display: 'flex', alignItems: 'center'}}>
+                            <div className={styles.color} style={{backgroundColor: element.backgroundColor}} />
+                            {element.description}
+                          </th>
                           <th>{element.max}</th>
                           <th>{element.sd.toFixed(4)}</th>
-                          <th>{element.linearRegression}</th>
-                          <th>{element.r2}</th>
                         </tr>
                       </tbody>)
                   }
+                  return null
                 })}
+              </table>
+              <table style={{marginTop: '12px'}}>
+                <tbody>
+                  <tr>
+                    <th>Regresión lineal</th>
+                    <th>R2</th>
+                  </tr>
+                  <tr>
+                    {linearRegression.formula && <th>{linearRegression.formula}</th>}
+                    {linearRegression.r2 && <th>{linearRegression.r2}</th>}
+                  </tr>
+                </tbody>
               </table>
             </div>
           </div>

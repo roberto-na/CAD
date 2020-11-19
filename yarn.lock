@@ -2006,6 +2006,11 @@
   resolved "https://registry.yarnpkg.com/@types/eslint-visitor-keys/-/eslint-visitor-keys-1.0.0.tgz#1ee30d79544ca84d68d4b3cdb0af4f205663dd2d"
   integrity sha512-OCutwjDZ4aFS6PB1UZ988C4YgwlBHJd6wCeQqaLdmadZ/7e+w79+hbMUFC1QXDNCmdyoRfAFdm0RypzwR+Qpag==
 
+"@types/estree@*":
+  version "0.0.45"
+  resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.45.tgz#e9387572998e5ecdac221950dab3e8c3b16af884"
+  integrity sha512-jnqIUKDUqJbDIUxm0Uj7bnlMnRm1T/eZ9N+AVMqhPgzrba2GhGG5o/jCTwmdPK709nEZsGoMzXEDUjcXHa3W0g==
+
 "@types/glob@^7.1.1":
   version "7.1.3"
   resolved "https://registry.yarnpkg.com/@types/glob/-/glob-7.1.3.tgz#e6ba80f36b7daad2c685acd9266382e68985c183"
@@ -2412,7 +2417,7 @@ acorn@^6.0.1, acorn@^6.0.4, acorn@^6.2.1:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.4.2.tgz#35866fd710528e92de10cf06016498e47e39e1e6"
   integrity sha512-XtGIhXwF8YM8bJhGxG5kXgjkEuNGLTkoYqVE+KMR+aspr4KGYmKYg7yUe3KghyQ9yheNwLnjmzh/7+gfDBmHCQ==
 
-acorn@^7.1.1:
+acorn@^7.1.0, acorn@^7.1.1:
   version "7.4.1"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-7.4.1.tgz#feaed255973d2e77555b83dbc08851a6c63520fa"
   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
@@ -6268,6 +6273,18 @@ is-accessor-descriptor@^1.0.0:
   dependencies:
     kind-of "^6.0.0"
 
+is-any-array@0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/is-any-array/-/is-any-array-0.0.3.tgz#cbdd8c7189d47b53b050969245f4ef7e55550b9b"
+  integrity sha512-Lr5SRykZv6uuYMZURz7+YpigT1ziTBHOTgFJ1zK7gL+9Wbet5Ha1ws6S84Jo/lH4zep02b95sk6o4+MTk97mPQ==
+
+is-any-array@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/is-any-array/-/is-any-array-0.1.0.tgz#e5a27965e3371610c10c66bca3be37ee177bdf8e"
+  integrity sha512-6Kkl1RnvfdkmXM6ZlP+kELGBMA74Nq5pSOm9gIKDaPRe9KQlIJzonrOgq0Jzn/iElB6F2/olpLgWYeVySzrSRg==
+  dependencies:
+    rollup "^1.31.1"
+
 is-arguments@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/is-arguments/-/is-arguments-1.0.4.tgz#3faf966c7cba0ff437fb31f6250082fcf0448cf3"
@@ -7770,6 +7787,58 @@ mkdirp@^0.5.1, mkdirp@^0.5.3, mkdirp@^0.5.5, mkdirp@~0.5.1:
   integrity sha512-NKmAlESf6jMGym1++R0Ra7wvhV+wFW63FaSOFPwRahvea0gMUcGUhVeAg/0BC0wiv9ih5NYPB1Wn1UEI1/L+xQ==
   dependencies:
     minimist "^1.2.5"
+
+ml-array-max@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/ml-array-max/-/ml-array-max-1.2.0.tgz#141595131fe10208dd89897ce98ab7fd382a3951"
+  integrity sha512-3UH7XCdjINxbtBWj1EuHMeI242Q3uLuC4rTpSybBWUpGjnG/BefAFxmTolUCuXDM59mJ/G/re80CQbaVIuMjQA==
+  dependencies:
+    is-any-array "^0.1.0"
+
+ml-array-min@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/ml-array-min/-/ml-array-min-1.2.0.tgz#6880ea319250a99ec73bc2799ac005c10a0f0489"
+  integrity sha512-Wgf2+lCndLy1SbeOZSUqlkxD9T1CXPT7CIlNGAZRRQI35wsqvfuNtLNH4qKFx8kNjlq3VGXKOSBHeiXR31vaTA==
+  dependencies:
+    is-any-array "^0.1.0"
+
+ml-array-rescale@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/ml-array-rescale/-/ml-array-rescale-1.3.2.tgz#ebdeaaa84d15f714dbb00e94a6a9336ddcf10413"
+  integrity sha512-kiXwdVCGrer7rLnjR6Q9ZgP6e9rbnmQvYVUMLXyqNg4+zOs+jek8yBupqPZPDr+NvlSE5OuMnfAbP1oA63kHBA==
+  dependencies:
+    is-any-array "^0.1.0"
+    ml-array-max "^1.2.0"
+    ml-array-min "^1.2.0"
+
+ml-baseline-correction-regression@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/ml-baseline-correction-regression/-/ml-baseline-correction-regression-0.3.0.tgz#c7b1c71b8761121805330b0e18c0a4cdd2a00a49"
+  integrity sha512-M0ihxDJobruhnf4wSc3xkxXueOKw45GwoP32wlaGwsT32vEAqeBwgf6ehp4e0hjCOM/HGN5ddNrbHLEBIguXxw==
+  dependencies:
+    ml-regression-polynomial "^2.1.0"
+
+ml-matrix@^6.4.1:
+  version "6.5.3"
+  resolved "https://registry.yarnpkg.com/ml-matrix/-/ml-matrix-6.5.3.tgz#0c4bb26714607cac76d289b943171c7083418eed"
+  integrity sha512-wXrn+ccApJ6gHktxmosOzs6B6M0huadahDpcgPYIAJggpqN7CtV4Vd7zpW6Lel/1oM5yCULcrbRJ1A5gF/GYDA==
+  dependencies:
+    ml-array-rescale "^1.3.2"
+
+ml-regression-base@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/ml-regression-base/-/ml-regression-base-2.1.1.tgz#738473d9b229bc6ddea97d03db083694a9c524a4"
+  integrity sha512-Jq2bDfinbPmc0i3+1UN7kK/nneXkAHhBRA9zjv1Kbdxwlskr5TbRPmtqigDnFFQvMXeWQ17oJH9mmnLSe6wUfg==
+  dependencies:
+    is-any-array "0.0.3"
+
+ml-regression-polynomial@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/ml-regression-polynomial/-/ml-regression-polynomial-2.1.0.tgz#cedee0b7f80b46c2d53ce54971a12eb7b3db40a9"
+  integrity sha512-iQnOYQ/gRRbT3264l3yaMfbC2AvWvL1SE0BeeRFe+wUqwP2SCDfbw0q6Md012GnY2pf8VpdOEVJ+PFGK0vgBIg==
+  dependencies:
+    ml-matrix "^6.4.1"
+    ml-regression-base "^2.1.1"
 
 moment@^2.10.2:
   version "2.29.1"
@@ -10163,6 +10232,15 @@ ripemd160@^2.0.0, ripemd160@^2.0.1:
   dependencies:
     hash-base "^3.0.0"
     inherits "^2.0.1"
+
+rollup@^1.31.1:
+  version "1.32.1"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-1.32.1.tgz#4480e52d9d9e2ae4b46ba0d9ddeaf3163940f9c4"
+  integrity sha512-/2HA0Ec70TvQnXdzynFffkjA6XN+1e2pEv/uKS5Ulca40g2L7KuOE3riasHoNVHOsFD5KKZgDsMk1CP3Tw9s+A==
+  dependencies:
+    "@types/estree" "*"
+    "@types/node" "*"
+    acorn "^7.1.0"
 
 rsvp@^4.8.4:
   version "4.8.5"
