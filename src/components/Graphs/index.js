@@ -30,6 +30,7 @@ const Graph = (props) => {
     formula: null,
   })
   const [selectedGraph, setSelectedGraph] = useState(null)
+  const [selectedGraphFilter, setSelectedGraphFilter] = useState(null)
 
   const urlParams = new URLSearchParams(window.location.search)
 
@@ -44,7 +45,6 @@ const Graph = (props) => {
     const getLinearRegression = () => {
       const concatValues = []
       data.datasets.map((element, i) => {
-        if(selectedGraph && selectedGraph.id === i) return;
         concatValues.push([parseFloat(element.description), element.max])
       })
       concatValues.sort((a, b) => a[0] - b[0]);
@@ -98,13 +98,17 @@ const Graph = (props) => {
     })
   }
 
-const getRegression = (data) => {
+  const getRegression = (data) => {
     return regression.linear(data, {precision: 5})
   };
 
   const addFilter = (selectedToGraph) => {
-    const filter = [...filters, {date: selectedDate, time:selectedTime}]
-    setFilters(filter)
+    if(selectedToGraph) {
+      setSelectedGraphFilter({date: selectedDate, time:selectedTime})
+    } else {
+      const filter = [...filters, {date: selectedDate, time:selectedTime}]
+      setFilters(filter)
+    }
     db.ref(`Data/${urlParams.get('name')}/${selected}/${selectedDate}/${selectedTime}`)
     .on('value', response => {
       const current = response.val().Corriente.replace(/ /g,'').split(',').map(Number)
@@ -121,40 +125,43 @@ const getRegression = (data) => {
       const concatValuesData = []
       for(let i = 0; i < current.length; i++) {
         sd += (Math.pow((corrected[i] - mean), 2) / current.length)
-        concatValuesData.push({x: voltage[i], y: corrected[i]})
+        if(selectedToGraph) {
+          concatValuesData.push([voltage[i], corrected[i]])
+        } else {
+          concatValuesData.push({x: voltage[i], y: corrected[i]})
+        }
       }
       sd = Math.sqrt(sd)
-      const r = Math.floor(Math.random() * Math.floor(256))
-      const g = Math.floor(Math.random() * Math.floor(256))
-      const b = Math.floor(Math.random() * Math.floor(256))
-      const dataToGraph = {
-        id: data.datasets ? data.datasets.length : 0,
-        typeToDisplay: 'original',
-        label: selectedDate + " " + selectedTime,
-        data: concatValuesData,
-        fill: false,
-        backgroundColor: `rgb(${r}, ${g}, ${b})`,
-        borderColor: `rgb(${r}, ${g}, ${b})`,
-        showLine: true,
-        description: response.val().Descripcion,
-        max: max,
-        sd: sd,
-      }
-      const newData = [...data.datasets, dataToGraph]
-      setData(prevState => ({
-        datasets: newData,
-      }))
       if(selectedToGraph) {
-        const concatValues = []
-        for(let i = 0; i < current.length; i++) {
-          const temp = []
-          temp.push(voltage[i])
-          temp.push(corrected[i])
-          concatValues.push(temp)
+        const lr = getRegression(concatValuesData)
+        const dataToGraph = {
+          id: filters.length,
+          max: max,
+          sd: sd,
+          lr: lr,
+          description: response.val().Descripcion,
         }
-        const lr = getRegression(concatValues)
-        dataToGraph.lr = lr
         setSelectedGraph(dataToGraph)
+      } else {
+        const r = Math.floor(Math.random() * Math.floor(256))
+        const g = Math.floor(Math.random() * Math.floor(256))
+        const b = Math.floor(Math.random() * Math.floor(256))
+        const dataToGraph = {
+          id: filters.length,
+          label: selectedDate + " " + selectedTime,
+          data: concatValuesData,
+          fill: false,
+          backgroundColor: `rgb(${r}, ${g}, ${b})`,
+          borderColor: `rgb(${r}, ${g}, ${b})`,
+          showLine: true,
+          description: response.val().Descripcion,
+          max: max,
+          sd: sd,
+        }
+        const newData = [...data.datasets, dataToGraph]
+        setData(prevState => ({
+          datasets: newData,
+        }))
       }
     })
     setDisableButton(false)
@@ -172,12 +179,7 @@ const getRegression = (data) => {
     setData(prevState => ({
       datasets: newData
     }))
-    if(selectedGraph && index === selectedGraph.id) {
-      setSelectedGraph(null)
-    }
   }
-
-  console.log(selectedGraph)
 
   return (
     <div className={styles.container}>
@@ -218,8 +220,19 @@ const getRegression = (data) => {
                 )}
                 <div className={styles.displayFilters}>
                   {
+                    selectedGraphFilter && (
+                      <div className={`${styles.filter} ${styles.selected}`}>
+                        {`${selectedGraphFilter.date} ${selectedGraphFilter.time}`}
+                        <div className={styles.delete}
+                        onClick={() => {setSelectedGraphFilter(null); setSelectedGraph(null)}}>
+                          <img src={deleteIcon} alt='delete' style={{height: '10px'}}/>
+                        </div>
+                      </div>
+                    )
+                  }
+                  {
                     filters.map((filter, i) => (
-                      <div className={`${styles.filter} ${selectedGraph && i === selectedGraph.id && styles.selected}`} key={i}>
+                      <div className={styles.filter} key={i}>
                         {`${filter.date} ${filter.time}`}
                         <div className={styles.delete}
                         onClick={() => removeFilter(i)}>
@@ -247,9 +260,6 @@ const getRegression = (data) => {
                   </tr>
                 </thead>
                 {data.datasets && data.datasets.map((element, i) => {
-                  if(selectedGraph && selectedGraph.id === i) {
-                    return null
-                  }
                   return (
                     <tbody key={i}>
                       <tr>
