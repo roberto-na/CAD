@@ -29,9 +29,11 @@ const Graph = (props) => {
     r2: null,
     formula: null,
   })
+  const [selectedGraph, setSelectedGraph] = useState(null)
+
+  const urlParams = new URLSearchParams(window.location.search)
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
     db.ref(`Data/${urlParams.get('name')}`)
     .on('value', response => {
       setSidebarOptions(response.val())
@@ -41,13 +43,12 @@ const Graph = (props) => {
   useEffect(() => {
     const getLinearRegression = () => {
       const concatValues = []
-      data.datasets.map((element) => {
+      data.datasets.map((element, i) => {
+        if(selectedGraph && selectedGraph.id === i) return;
         concatValues.push([parseFloat(element.description), element.max])
       })
       concatValues.sort((a, b) => a[0] - b[0]);
-      console.log(concatValues)
       const lr = getRegression(concatValues)
-      console.log(lr)
       setLinearRegression({
         r2: lr.r2,
         formula: lr.string
@@ -69,7 +70,6 @@ const Graph = (props) => {
 
   const getData = (folder) => {
     setSelected(folder)
-    const urlParams = new URLSearchParams(window.location.search)
     db.ref(`Data/${urlParams.get('name')}/${folder}`)
     .on('value', response => {
       const options = []
@@ -85,7 +85,6 @@ const Graph = (props) => {
 
   const getTimes = (value) => {
     setDisableTimes(true)
-    const urlParams = new URLSearchParams(window.location.search)
     db.ref(`Data/${urlParams.get('name')}/${selected}/${value.value}`)
     .on('value', response => {
       const options = []
@@ -100,13 +99,12 @@ const Graph = (props) => {
   }
 
 const getRegression = (data) => {
-    return regression.linear(data)
+    return regression.linear(data, {precision: 5})
   };
 
-  const addFilter = () => {
+  const addFilter = (selectedToGraph) => {
     const filter = [...filters, {date: selectedDate, time:selectedTime}]
     setFilters(filter)
-    const urlParams = new URLSearchParams(window.location.search)
     db.ref(`Data/${urlParams.get('name')}/${selected}/${selectedDate}/${selectedTime}`)
     .on('value', response => {
       const current = response.val().Corriente.replace(/ /g,'').split(',').map(Number)
@@ -120,15 +118,9 @@ const getRegression = (data) => {
         mean += corrected[i]
       }
       mean = mean / current.length;
-      // const concatValues = []
       const concatValuesData = []
-      // const linearRegression = getRegression(concatValues)
       for(let i = 0; i < current.length; i++) {
         sd += (Math.pow((corrected[i] - mean), 2) / current.length)
-        // const temp = []
-        // temp.push(voltage[i])
-        // temp.push(corrected[i])
-        // concatValues.push(temp)
         concatValuesData.push({x: voltage[i], y: corrected[i]})
       }
       sd = Math.sqrt(sd)
@@ -136,6 +128,7 @@ const getRegression = (data) => {
       const g = Math.floor(Math.random() * Math.floor(256))
       const b = Math.floor(Math.random() * Math.floor(256))
       const dataToGraph = {
+        id: data.datasets ? data.datasets.length : 0,
         typeToDisplay: 'original',
         label: selectedDate + " " + selectedTime,
         data: concatValuesData,
@@ -151,6 +144,18 @@ const getRegression = (data) => {
       setData(prevState => ({
         datasets: newData,
       }))
+      if(selectedToGraph) {
+        const concatValues = []
+        for(let i = 0; i < current.length; i++) {
+          const temp = []
+          temp.push(voltage[i])
+          temp.push(corrected[i])
+          concatValues.push(temp)
+        }
+        const lr = getRegression(concatValues)
+        dataToGraph.lr = lr
+        setSelectedGraph(dataToGraph)
+      }
     })
     setDisableButton(false)
     setDisableTimes(false)
@@ -167,7 +172,12 @@ const getRegression = (data) => {
     setData(prevState => ({
       datasets: newData
     }))
+    if(selectedGraph && index === selectedGraph.id) {
+      setSelectedGraph(null)
+    }
   }
+
+  console.log(selectedGraph)
 
   return (
     <div className={styles.container}>
@@ -179,7 +189,7 @@ const getRegression = (data) => {
       </div>
       <div className={styles.graphContainer}>
         <div className={styles.graphContent}>
-          <h1 className={styles.title}>{selected}</h1>
+          <h1 className={styles.title}>{selected}{selected && ' - '}{urlParams.get('name')}</h1>
           <div className={styles.graphInformation}>
             <div className={styles.graph}>
               <div className={styles.header}>
@@ -198,17 +208,21 @@ const getRegression = (data) => {
                       disabled={!disableTimes}
                       onChange={(value) => {setSelectedTime(value.value); setDisableButton(true)}}
                       options={times}/>
-                    <button disabled={!disableButton} onClick={() => addFilter()}>
+                    <button disabled={!disableButton} onClick={() => addFilter(false)} style={{marginRight: '12px'}}>
                       Añadir fecha
+                    </button>
+                    <button disabled={!disableButton} onClick={() => addFilter(true)}>
+                      Regresión lineal
                     </button>
                   </div>
                 )}
                 <div className={styles.displayFilters}>
                   {
                     filters.map((filter, i) => (
-                      <div className={styles.filter} key={i}>
+                      <div className={`${styles.filter} ${selectedGraph && i === selectedGraph.id && styles.selected}`} key={i}>
                         {`${filter.date} ${filter.time}`}
-                        <div className={styles.delete} onClick={() => removeFilter(i)}>
+                        <div className={styles.delete}
+                        onClick={() => removeFilter(i)}>
                           <img src={deleteIcon} alt='delete' style={{height: '10px'}}/>
                         </div>
                       </div>
@@ -233,20 +247,20 @@ const getRegression = (data) => {
                   </tr>
                 </thead>
                 {data.datasets && data.datasets.map((element, i) => {
-                  if(element.typeToDisplay === 'original') {
-                    return (
-                      <tbody key={i}>
-                        <tr>
-                          <th style={{display: 'flex', alignItems: 'center'}}>
-                            <div className={styles.color} style={{backgroundColor: element.backgroundColor}} />
-                            {element.description}
-                          </th>
-                          <th>{element.max}</th>
-                          <th>{element.sd.toFixed(4)}</th>
-                        </tr>
-                      </tbody>)
+                  if(selectedGraph && selectedGraph.id === i) {
+                    return null
                   }
-                  return null
+                  return (
+                    <tbody key={i}>
+                      <tr>
+                        <th style={{display: 'flex', alignItems: 'center'}}>
+                          <div className={styles.color} style={{backgroundColor: element.backgroundColor}} />
+                          {element.description}
+                        </th>
+                        <th>{element.max}</th>
+                        <th>{element.sd.toFixed(4)}</th>
+                      </tr>
+                    </tbody>)
                 })}
               </table>
               <table style={{marginTop: '12px'}}>
@@ -261,6 +275,36 @@ const getRegression = (data) => {
                   </tr>
                 </tbody>
               </table>
+              <h6 style={{marginTop: '24px'}}>Evaluación de regresión lineal</h6>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Concentración</th>
+                    <th>Pico máximo</th>
+                    <th>Desviación estandar</th>
+                  </tr>
+                </thead>
+                {
+                  selectedGraph && (
+                    <tbody>
+                      <tr>
+                        <th style={{display: 'flex', alignItems: 'center'}}>
+                        <div className={styles.color} style={{backgroundColor: selectedGraph.backgroundColor}} />
+                        {selectedGraph.description}
+                        </th>
+                        <th>{selectedGraph.max}</th>
+                        <th>{selectedGraph.sd.toFixed(4)}</th>
+                      </tr>
+                    </tbody>
+                  )
+                }
+              </table>
+              {selectedGraph && (
+                <div>
+                  <p style={{marginTop: '12px'}}><strong>Fórmula:&nbsp;</strong>{selectedGraph.lr.string}</p>
+                  <p>y = {selectedGraph.lr.equation[0] * parseFloat(selectedGraph.max) + selectedGraph.lr.equation[1]}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
