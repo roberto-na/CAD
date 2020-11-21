@@ -51,7 +51,9 @@ const Graph = (props) => {
       const lr = getRegression(concatValues)
       setLinearRegression({
         r2: lr.r2,
-        formula: lr.string
+        formula: lr.string,
+        m: lr.equation[0],
+        b: lr.equation[1],
       })
     }
     getLinearRegression()
@@ -66,6 +68,20 @@ const Graph = (props) => {
       enabled: true,
       mode: 'x',
     },
+    scales: {
+      yAxes: [{
+        scaleLabel: {
+          display: true,
+          labelString: 'Corriente'
+        }
+      }],
+      xAxes: [{
+        scaleLabel: {
+          display: true,
+          labelString: 'Voltaje'
+        }
+      }]
+    }
   }
 
   const getData = (folder) => {
@@ -211,10 +227,10 @@ const Graph = (props) => {
                       onChange={(value) => {setSelectedTime(value.value); setDisableButton(true)}}
                       options={times}/>
                     <button disabled={!disableButton} onClick={() => addFilter(false)} style={{marginRight: '12px'}}>
-                      Añadir fecha
+                      Añadir gráfica
                     </button>
                     <button disabled={!disableButton} onClick={() => addFilter(true)}>
-                      Regresión lineal
+                      Obtener concentración
                     </button>
                   </div>
                 )}
@@ -286,24 +302,17 @@ const Graph = (props) => {
                 </tbody>
               </table>
               <h6 style={{marginTop: '24px'}}>Evaluación de regresión lineal</h6>
-              <table>
+              <table style={{width: '100%'}}>
                 <thead>
                   <tr>
-                    <th>Concentración</th>
                     <th>Pico máximo</th>
-                    <th>Desviación estandar</th>
                   </tr>
                 </thead>
                 {
                   selectedGraph && (
                     <tbody>
                       <tr>
-                        <th style={{display: 'flex', alignItems: 'center'}}>
-                        <div className={styles.color} style={{backgroundColor: selectedGraph.backgroundColor}} />
-                        {selectedGraph.description}
-                        </th>
                         <th>{selectedGraph.max}</th>
-                        <th>{selectedGraph.sd.toFixed(4)}</th>
                       </tr>
                     </tbody>
                   )
@@ -311,8 +320,8 @@ const Graph = (props) => {
               </table>
               {selectedGraph && (
                 <div>
-                  <p style={{marginTop: '12px'}}><strong>Fórmula:&nbsp;</strong>{selectedGraph.lr.string}</p>
-                  <p>y = {selectedGraph.lr.equation[0] * parseFloat(selectedGraph.max) + selectedGraph.lr.equation[1]}</p>
+                  <p style={{marginTop: '12px'}}><strong>Fórmula:&nbsp;</strong>{linearRegression.formula}</p>
+                  <p>x = {(parseFloat(selectedGraph.max) - linearRegression.b) / linearRegression.m}</p>
                 </div>
               )}
             </div>
