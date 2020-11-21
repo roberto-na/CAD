@@ -207,7 +207,10 @@ const Graph = (props) => {
       </div>
       <div className={styles.graphContainer}>
         <div className={styles.graphContent}>
-          <h1 className={styles.title}>{selected}{selected && ' - '}{urlParams.get('name')}</h1>
+          <div style={{width: '100%', display: 'flex', justifyContent: 'space-between'}}>
+            <h1 className={styles.title}>{selected}{selected && ' - '}{urlParams.get('name')}</h1>
+            <button onClick={() => window.location = '/'}>Regresar</button>
+          </div>
           <div className={styles.graphInformation}>
             <div className={styles.graph}>
               <div className={styles.header}>
